@@ -1,0 +1,935 @@
+<title>Umfrage Study Terra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one calm column, one card per step; a sprout in the header grows as the survey progresses */
+:root {
+  --bg: #edf3f0;
+  --surface: #ffffff;
+  --ink: #16302a;
+  --muted: #587069;
+  --line: #d2dfd9;
+  --accent: #1e7656;
+  --accent-ink: #ffffff;
+  --sel: #e1f1e9;
+  --sun: #e9a91f;
+  --soil: #8a6a4a;
+  --warn: #b3261e;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1916; --surface: #15231f; --ink: #e4efea; --muted: #9bb1aa; --line: #29403a;
+    --accent: #4dbd8c; --accent-ink: #0a1612; --sel: #1b3a2e; --sun: #f0c04e; --soil: #b48d66; --warn: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1916; --surface: #15231f; --ink: #e4efea; --muted: #9bb1aa; --line: #29403a;
+  --accent: #4dbd8c; --accent-ink: #0a1612; --sel: #1b3a2e; --sun: #f0c04e; --soil: #b48d66; --warn: #ff8a80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 680px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 56px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+header.top { display: flex; align-items: center; gap: 14px; }
+.brand { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.brand .name { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
+.brand .part { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.lang { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+.lang button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: 600 0.8rem var(--font-body); padding: 6px 12px; cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.sprout { width: 44px; height: 44px; flex-shrink: 0; }
+.sprout .soil { fill: var(--soil); }
+.sprout .stem { stroke: var(--accent); }
+.sprout .leaf { fill: var(--accent); transition: opacity .4s, transform .4s; transform-box: fill-box; }
+.sprout .bloom { fill: var(--sun); transition: opacity .4s; }
+.bar { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width .4s ease; }
+.preview-note {
+  font-size: 0.82rem; color: var(--muted); border: 1px dashed var(--line);
+  border-radius: 10px; padding: 8px 12px;
+}
+main { display: flex; flex-direction: column; gap: 16px; }
+.intro h1, .section-head h2 {
+  font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em;
+  text-wrap: balance; margin: 0;
+}
+.intro h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); line-height: 1.1; }
+.intro p { margin: 0; max-width: 60ch; }
+.intro { display: flex; flex-direction: column; gap: 14px; padding-block: 8px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font-size: 0.8rem; font-weight: 600; color: var(--accent);
+  background: var(--sel); border-radius: 999px; padding: 4px 10px;
+}
+.section-head { display: flex; flex-direction: column; gap: 4px; }
+.section-head .eyebrow { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
+.section-head h2 { font-size: 1.6rem; line-height: 1.15; }
+.section-head p { margin: 4px 0 0; color: var(--muted); }
+.q {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px; display: flex; flex-direction: column; gap: 12px; margin: 0; min-width: 0;
+}
+.q.invalid { border-color: var(--warn); }
+.q legend, .q .qlabel { padding: 0; font-weight: 600; font-size: 1.02rem; line-height: 1.4; }
+.q legend { float: left; width: 100%; margin-bottom: 12px; }
+.q legend + * { clear: both; }
+.q .num { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.q .hint { font-size: 0.85rem; color: var(--muted); margin-top: -4px; }
+.q .err { font-size: 0.85rem; color: var(--warn); font-weight: 500; }
+.opts { display: grid; gap: 8px; }
+.opt {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  border: 1.5px solid var(--line); border-radius: 11px; padding: 11px 14px;
+  background: var(--surface); transition: border-color .15s, background .15s;
+}
+.opt:hover { border-color: var(--accent); }
+.opt input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opt .mark {
+  width: 20px; height: 20px; flex-shrink: 0; border: 2px solid var(--muted);
+  display: grid; place-items: center; transition: all .15s;
+}
+.opt.radio .mark { border-radius: 50%; }
+.opt.check .mark { border-radius: 6px; }
+.opt .mark::after { content: ""; width: 8px; height: 8px; border-radius: inherit; background: var(--accent-ink); transform: scale(0); transition: transform .15s; }
+.opt.check .mark::after { width: 10px; height: 6px; background: none; border: solid var(--accent-ink); border-width: 0 0 2.5px 2.5px; border-radius: 0; transform: rotate(-45deg) scale(0); margin-top: -3px; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--sel); }
+.opt:has(input:checked) .mark { background: var(--accent); border-color: var(--accent); }
+.opt:has(input:checked) .mark::after { transform: scale(1); }
+.opt.check:has(input:checked) .mark::after { transform: rotate(-45deg) scale(1); }
+.opt:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.opt .txt { min-width: 0; }
+.other-input { margin-top: -2px; }
+input[type="text"], textarea {
+  width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+  border: 1.5px solid var(--line); border-radius: 11px; padding: 11px 13px;
+}
+textarea { min-height: 96px; resize: vertical; }
+input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--accent); }
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.scale label { position: relative; }
+.scale input { position: absolute; opacity: 0; inset: 0; }
+.scale span {
+  display: grid; place-items: center; height: 50px; border-radius: 11px;
+  border: 1.5px solid var(--line); font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;
+  cursor: pointer; font-variant-numeric: tabular-nums; transition: all .15s;
+}
+.scale label:hover span { border-color: var(--accent); }
+.scale input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.scale input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.scale-ends { display: flex; justify-content: space-between; gap: 12px; font-size: 0.82rem; color: var(--muted); }
+.scale-ends span:last-child { text-align: right; }
+.roles { display: grid; gap: 10px; }
+.role {
+  appearance: none; text-align: left; font: inherit; color: var(--ink); cursor: pointer;
+  display: flex; align-items: center; gap: 14px; background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: var(--radius); padding: 16px 18px;
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.role:hover { border-color: var(--accent); }
+.role:active { transform: scale(0.99); }
+.role[aria-pressed="true"] { border-color: var(--accent); background: var(--sel); }
+.role:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.role svg { width: 34px; height: 34px; flex-shrink: 0; color: var(--accent); }
+.role b { display: block; font-size: 1.05rem; }
+.role small { color: var(--muted); font-size: 0.85rem; }
+.app-image {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.app-image img { display: block; width: 100%; height: auto; }
+.app-image .ph {
+  aspect-ratio: 16 / 10; max-width: 100%; display: grid; place-items: center; text-align: center;
+  color: var(--muted); padding: 20px; background: var(--sel); font-size: 0.9rem;
+}
+.app-image figcaption { font-size: 0.85rem; color: var(--muted); padding: 10px 14px; }
+.subblock { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 6px 0 -4px; }
+nav.steps { display: flex; gap: 10px; justify-content: space-between; align-items: center; padding-top: 4px; }
+.btn {
+  appearance: none; font: 600 1rem var(--font-body); border-radius: 999px; cursor: pointer;
+  padding: 13px 24px; border: 1.5px solid transparent; transition: filter .15s, background .15s;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--muted); }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn[disabled] { opacity: .6; cursor: progress; }
+.btn.primary:only-child { margin-left: auto; }
+.done { text-align: center; padding-block: 30px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.done svg { width: 120px; height: 120px; }
+.done h1 { font-family: var(--font-display); font-size: 2rem; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.done p { margin: 0; color: var(--muted); max-width: 46ch; }
+.send-error { color: var(--warn); font-size: 0.9rem; }
+.anim-in { animation: rise .35s ease both; }
+@keyframes rise { from { transform: translateY(8px); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+/* ---------- Auswertung (nur für das Team) ---------- */
+.dash { display: flex; flex-direction: column; gap: 16px; }
+.login { display: flex; flex-direction: column; gap: 10px; max-width: 420px; }
+.login .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.login .row input { flex: 1; min-width: 180px; }
+.login .msg { color: var(--warn); font-size: 0.9rem; margin: 0; }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 520px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; min-width: 0; }
+.tile b { display: block; font-family: var(--font-display); font-size: 1.7rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: 0.8rem; color: var(--muted); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters button {
+  appearance: none; font: 600 0.85rem var(--font-body); color: var(--ink); cursor: pointer;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 14px;
+}
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.filters button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.dash-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.dash-actions a.btn { text-decoration: none; display: inline-block; }
+.btn.small { padding: 9px 16px; font-size: 0.9rem; }
+.res-n { font-size: 0.85rem; color: var(--muted); margin-top: -6px; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; flex-direction: column; gap: 4px; }
+.bar-row .lbl { display: flex; justify-content: space-between; gap: 12px; font-size: 0.92rem; }
+.bar-row .lbl span:first-child { min-width: 0; }
+.bar-row .lbl span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar-row .track { height: 10px; background: var(--sel); border-radius: 4px; overflow: hidden; }
+.bar-row .track i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 2px; }
+.bar-row.zero .track i { min-width: 0; }
+.avg { font-size: 0.92rem; }
+.avg b { font-family: var(--font-display); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.texts { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.texts li { background: var(--bg); border-radius: 10px; padding: 9px 12px; font-size: 0.92rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.texts .tag { display: block; font-size: 0.75rem; color: var(--muted); }
+.subtle { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.linkish { appearance: none; background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <svg class="sprout" viewBox="0 0 44 44" aria-hidden="true">
+      <ellipse class="soil" cx="22" cy="39" rx="15" ry="3.5"></ellipse>
+      <line class="stem" id="stem" x1="22" y1="38" x2="22" y2="34" stroke-width="2.5" stroke-linecap="round"></line>
+      <path class="leaf" id="leaf1" d="M22 31 C 15 31, 12 26, 12 22 C 17 22, 22 25, 22 31 Z" opacity="0"></path>
+      <path class="leaf" id="leaf2" d="M22 25 C 29 25, 32 20, 32 16 C 27 16, 22 19, 22 25 Z" opacity="0"></path>
+      <path class="leaf" id="leaf3" d="M22 19 C 16 19, 14 15, 14 12 C 18 12, 22 14, 22 19 Z" opacity="0"></path>
+      <circle class="bloom" id="bloom" cx="22" cy="9" r="4.5" opacity="0"></circle>
+    </svg>
+    <div class="brand">
+      <span class="name">Study Terra</span>
+      <span class="part" id="partLabel"></span>
+    </div>
+    <div class="lang" role="group" aria-label="Sprache / Language">
+      <button type="button" id="langDe" aria-pressed="true">DE</button>
+      <button type="button" id="langEn" aria-pressed="false">EN</button>
+    </div>
+  </header>
+  <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+  <div class="preview-note" id="previewNote" hidden></div>
+  <main id="app" aria-live="polite"></main>
+</div>
+
+<script>
+/* ============================================================
+   EINSTELLUNGEN
+   APP_IMAGE_URL: Link zu einem öffentlich erreichbaren Bild der App
+   (für Teil D). Leer lassen = Platzhalter wird angezeigt.
+   ============================================================ */
+var APP_IMAGE_URL = '';
+
+/* ---------- Texte der Oberfläche ---------- */
+var UI = {
+  de: {
+    title: 'Umfrage zur Lern-App „Study Terra“',
+    intro1: 'Wir entwickeln eine Lern-App, in der dein Lernfortschritt eine Geschichte erzählt und eine eigene Welt wachsen lässt. Mit deinen Antworten hilfst du uns, die App so zu gestalten, dass sie dir wirklich beim Lernen hilft.',
+    intro2: 'Die Umfrage ist anonym und dauert ca. 5–8 Minuten. Es gibt keine richtigen oder falschen Antworten.',
+    chipAnon: 'Anonym', chipTime: '5–8 Minuten',
+    start: 'Umfrage starten', next: 'Weiter', back: 'Zurück', submit: 'Absenden', sending: 'Wird gesendet …',
+    multi: 'Mehrfachauswahl möglich', required: 'Bitte wähle eine Antwort.', optional: 'Optional',
+    otherPh: 'Bitte angeben', textPh: 'Deine Antwort',
+    part: 'Teil', of: 'von',
+    roleHint: 'Tippe auf das, was auf dich zutrifft. Danach geht es direkt weiter.',
+    pupilSub: 'Du gehst zur Schule', studentSub: 'Du studierst an einer Uni oder FH', parentSub: 'Sie haben ein Kind, das lernt',
+    imgPh: 'Hier wird ein Bild der App gezeigt.',
+    imgCap: 'So könnte Study Terra aussehen.',
+    thanks: 'Vielen Dank für deine Teilnahme!',
+    thanksSub: 'Deine Antworten wurden gespeichert. Du kannst dieses Fenster jetzt schließen.',
+    sendErr: 'Die Antworten konnten nicht gesendet werden. Bitte prüfe deine Internetverbindung und versuche es noch einmal.',
+    preview: 'Vorschau: In dieser Ansicht werden keine Antworten gespeichert.',
+    restart: 'Neue Umfrage ausfüllen', resume: 'Weitermachen', startOver: 'Von vorne beginnen'
+  },
+  en: {
+    title: 'Survey on the learning app “Study Terra”',
+    intro1: 'We are developing a learning app in which your study progress tells a story and grows a world of its own. Your answers help us design the app so that it really helps you learn.',
+    intro2: 'The survey is anonymous and takes about 5–8 minutes. There are no right or wrong answers.',
+    chipAnon: 'Anonymous', chipTime: '5–8 minutes',
+    start: 'Start survey', next: 'Next', back: 'Back', submit: 'Submit', sending: 'Sending …',
+    multi: 'Multiple answers possible', required: 'Please choose an answer.', optional: 'Optional',
+    otherPh: 'Please specify', textPh: 'Your answer',
+    part: 'Part', of: 'of',
+    roleHint: 'Tap whatever applies to you. You will move on right away.',
+    pupilSub: 'You go to school', studentSub: 'You study at a university', parentSub: 'You have a child who is learning',
+    imgPh: 'An image of the app is shown here.',
+    imgCap: 'This is how Study Terra could look.',
+    thanks: 'Thank you for taking part!',
+    thanksSub: 'Your answers have been saved. You can close this window now.',
+    sendErr: 'Your answers could not be sent. Please check your internet connection and try again.',
+    preview: 'Preview: answers are not saved in this view.',
+    restart: 'Fill in the survey again', resume: 'Continue', startOver: 'Start over'
+  }
+};
+
+/* ---------- Fragen ---------- */
+function o(de, en, extra) { var r = { v: de, de: de, en: en || de }; if (extra) for (var k in extra) r[k] = extra[k]; return r; }
+var OTHER = function () { return o('Anderes', 'Other', { other: true }); };
+var PAY = [o('Nein, nur gratis', 'No, only if it is free'), o('bis 3 €', 'up to €3'), o('3–5 €', '€3–5'), o('mehr als 5 €', 'more than €5')];
+
+var Q = {
+  q1: { n: 1, type: 'radio', de: 'Wer bist du?', en: 'Who are you?',
+        options: [o('Schüler/in', 'Pupil'), o('Student/in', 'University student'), o('Elternteil', 'Parent')] },
+  q2: { n: 2, type: 'radio', de: 'Wie alt bist du?', en: 'How old are you?',
+        options: [o('unter 12', 'under 12'), o('12–14'), o('15–17'), o('18–21'), o('22–25'), o('über 25', 'over 25')] },
+  q3: { n: 3, type: 'radio', de: 'Welche Schule bzw. Hochschule besuchst du?', en: 'Which school or university do you attend?',
+        options: [
+          o('Mittelschule', 'Middle school (Mittelschule)', { roles: ['pupil'] }),
+          o('AHS (Gymnasium)', 'Academic secondary school (AHS)', { roles: ['pupil'] }),
+          o('BHS (z. B. HAK, HTL, HLW)', 'Vocational college (BHS, e.g. HAK, HTL, HLW)', { roles: ['pupil'] }),
+          o('Universität', 'University', { roles: ['student'] }),
+          o('Fachhochschule', 'University of applied sciences', { roles: ['student'] }),
+          OTHER()
+        ] },
+  q4: { n: 4, type: 'radio', de: 'Wie viele Stunden lernst du pro Woche außerhalb des Unterrichts?', en: 'How many hours per week do you study outside of class?',
+        options: [o('0–1 Stunden', '0–1 hours'), o('2–4 Stunden', '2–4 hours'), o('5–8 Stunden', '5–8 hours'), o('mehr als 8 Stunden', 'more than 8 hours')] },
+  q5: { n: 5, type: 'check', de: 'Womit lernst du meistens?', en: 'What do you usually study with?',
+        options: [o('Schulbuch / Skriptum', 'Textbook / lecture notes'), o('Eigene Mitschrift', 'My own notes'), o('Karteikarten (Papier)', 'Flashcards (paper)'),
+                  o('Lern-Apps', 'Learning apps'), o('Videos (z. B. YouTube)', 'Videos (e.g. YouTube)'), o('KI-Tools (z. B. ChatGPT)', 'AI tools (e.g. ChatGPT)'),
+                  o('Lerngruppe', 'Study group'), OTHER()] },
+  q6: { n: 6, type: 'text', optional: true, de: 'Welche Lern-Apps nutzt du schon?', en: 'Which learning apps do you already use?' },
+  q7: { n: 7, type: 'check', de: 'Was ist beim Lernen am schwierigsten für dich?', en: 'What is the hardest part of studying for you?',
+        options: [o('Anfangen', 'Getting started'), o('Dranbleiben', 'Keeping it up'), o('Mir Dinge merken', 'Remembering things'), o('Langeweile', 'Boredom'),
+                  o('Zeit einteilen', 'Managing my time'), o('Ablenkung durch das Handy', 'Distraction by my phone'), OTHER()] },
+  q8: { n: 8, type: 'scale', de: 'Wie motiviert bist du meistens beim Lernen?', en: 'How motivated are you usually when studying?',
+        min: o('gar nicht', 'not at all'), max: o('sehr', 'very') },
+  q9: { n: 9, type: 'radio', de: 'Wie oft spielst du Videospiele?', en: 'How often do you play video games?',
+        options: [o('Nie', 'Never'), o('Selten', 'Rarely'), o('Wöchentlich', 'Weekly'), o('Täglich', 'Daily')] },
+  q10: { n: 10, type: 'check', de: 'Welche Art von Spielen magst du?', en: 'What kind of games do you like?',
+        options: [o('Abenteuer', 'Adventure'), o('Rollenspiele', 'Role-playing games'), o('Aufbau / Simulation', 'Building / simulation'), o('Puzzle / Rätsel', 'Puzzle'),
+                  o('Story-Spiele', 'Story-driven games'), o('Wettkampf / Multiplayer', 'Competitive / multiplayer'), o('Keine', 'None', { exclusive: true })] },
+  q11: { n: 11, type: 'scale', de: 'Würde es dich motivieren, wenn dein Lernfortschritt eine Geschichte weitererzählt oder eine Welt wachsen lässt?',
+        en: 'Would it motivate you if your study progress continued a story or made a world grow?', min: o('gar nicht', 'not at all'), max: o('sehr', 'very much') },
+  q12: { n: 12, type: 'scale', de: 'Wie spricht dich dieser Stil an?', en: 'How much do you like this style?', min: o('gar nicht', 'not at all'), max: o('sehr', 'very much') },
+  q13: { n: 13, type: 'radio', de: 'Würdest du so eine App ausprobieren?', en: 'Would you try an app like this?',
+        options: [o('Ja', 'Yes'), o('Vielleicht', 'Maybe'), o('Nein', 'No')] },
+  q14: { n: 14, type: 'check', de: 'Welche Funktionen wären dir wichtig?', en: 'Which features would be important to you?',
+        options: [o('Eigene Karteikarten erstellen', 'Create my own flashcards'), o('KI erstellt Fragen aus meinen Unterlagen', 'AI creates questions from my materials'),
+                  o('Lernplan / Erinnerungen', 'Study plan / reminders'), o('Mit Freunden zusammen lernen oder spielen', 'Study or play together with friends'),
+                  o('Ranglisten', 'Leaderboards'), o('Offline-Modus', 'Offline mode'), OTHER()] },
+  q15: { n: 15, type: 'text', optional: true, de: 'Was würde dich davon abhalten, die App zu nutzen?', en: 'What would stop you from using the app?' },
+  q16: { n: 16, type: 'text', optional: true, de: 'Hast du noch Ideen oder Wünsche für die App?', en: 'Do you have any other ideas or wishes for the app?' },
+  q17: { n: 17, type: 'radio', de: 'Wer entscheidet bei dir, welche Apps du herunterladen darfst?', en: 'Who decides which apps you are allowed to download?',
+        options: [o('Ich selbst', 'Me'), o('Meine Eltern', 'My parents'), o('Wir gemeinsam', 'We decide together')] },
+  q18: { n: 18, type: 'check', de: 'Wofür würdest du die App am meisten brauchen?', en: 'What would you need the app for most?',
+        options: [o('Schularbeiten / Tests', 'Exams / tests'), o('Matura / Reifeprüfung', 'Final exams (Matura)'), o('Vokabeln', 'Vocabulary'), o('Hausübungen', 'Homework'), OTHER()] },
+  q19: { n: 19, type: 'radio', de: 'Würdest du für so eine App bezahlen? Wenn ja, wie viel pro Monat?', en: 'Would you pay for an app like this? If so, how much per month?', options: PAY },
+  q20: { n: 20, type: 'text', optional: true, de: 'Wie bereitest du dich meistens auf Prüfungen vor?', en: 'How do you usually prepare for exams?' },
+  q21: { n: 21, type: 'scale', de: 'Wäre dir eine verspielte App mit Geschichte für das Studium zu kindisch?', en: 'Would a playful, story-based app feel too childish for university?',
+        min: o('überhaupt nicht', 'not at all'), max: o('auf jeden Fall', 'definitely') },
+  q22: { n: 22, type: 'radio', de: 'Würdest du für so eine App bezahlen? Wenn ja, wie viel pro Monat?', en: 'Would you pay for an app like this? If so, how much per month?', options: PAY },
+  q23: { n: 23, type: 'check', de: 'Wie alt ist Ihr Kind bzw. sind Ihre Kinder?', en: 'How old is your child / are your children?',
+        options: [o('unter 10', 'under 10'), o('10–14'), o('15–19'), o('über 19', 'over 19')] },
+  q24: { n: 24, type: 'check', de: 'Welche Schule besucht Ihr Kind?', en: 'Which school does your child attend?',
+        options: [o('Volksschule', 'Primary school'), o('Mittelschule', 'Middle school (Mittelschule)'), o('AHS (Gymnasium)', 'Academic secondary school (AHS)'),
+                  o('BHS (z. B. HAK, HTL, HLW)', 'Vocational college (BHS, e.g. HAK, HTL, HLW)'), o('Universität / Fachhochschule', 'University'), OTHER()] },
+  q25: { n: 25, type: 'scale', de: 'Wie schwer fällt es Ihrem Kind, sich zum Lernen zu motivieren?', en: 'How hard is it for your child to get motivated to study?',
+        min: o('gar nicht schwer', 'not hard at all'), max: o('sehr schwer', 'very hard') },
+  q26: { n: 26, type: 'scale', de: 'Wie stehen Sie zu Lern-Apps mit Spiel-Elementen?', en: 'How do you feel about learning apps with game elements?',
+        min: o('sehr skeptisch', 'very sceptical'), max: o('sehr positiv', 'very positive') },
+  q27: { n: 27, type: 'radio', de: 'Würden Sie Ihrem Kind so eine App empfehlen oder erlauben?', en: 'Would you recommend or allow an app like this for your child?',
+        options: [o('Ja', 'Yes'), o('Vielleicht', 'Maybe'), o('Nein', 'No')] },
+  q28: { n: 28, type: 'check', de: 'Was wäre Ihnen bei so einer App wichtig?', en: 'What would be important to you in an app like this?',
+        options: [o('Übersicht über den Lernfortschritt', 'Overview of learning progress'), o('Begrenzte Spielzeit / Bildschirmzeit', 'Limited play / screen time'),
+                  o('Keine Werbung', 'No ads'), o('Keine Käufe in der App ohne Zustimmung', 'No in-app purchases without consent'), o('Datenschutz', 'Data protection'),
+                  o('Inhalte passend zum Lehrplan', 'Content matching the curriculum'), OTHER()] },
+  q29: { n: 29, type: 'radio', de: 'Wie viel würden Sie für so eine App pro Monat bezahlen?', en: 'How much would you pay for an app like this per month?',
+        options: [o('Nichts, nur gratis', 'Nothing, only if it is free'), o('bis 3 €', 'up to €3'), o('3–5 €', '€3–5'), o('5–10 €', '€5–10'), o('mehr als 10 €', 'more than €10')] },
+  q30: { n: 30, type: 'text', optional: true, de: 'Welche Bedenken hätten Sie?', en: 'What concerns would you have?' }
+};
+var Q_ORDER = Object.keys(Q);
+
+/* ---------- Verzweigungslogik ---------- */
+function role(a) { return ({ 'Schüler/in': 'pupil', 'Student/in': 'student', 'Elternteil': 'parent' })[a.q1] || null; }
+function isLearner(a) { var r = role(a); return r === 'pupil' || r === 'student'; }
+function isParent(a) { return role(a) === 'parent'; }
+/* Teil E: welcher Zusatzblock passt? */
+function blockE(a) {
+  var s = a.q3, r = role(a);
+  if (s === 'Mittelschule') return 'ms';
+  if (s === 'AHS (Gymnasium)' || s === 'BHS (z. B. HAK, HTL, HLW)') return 'hs';
+  if (s === 'Universität' || s === 'Fachhochschule') return 'uni';
+  if (s === 'Anderes') return r === 'student' ? 'uni' : 'hs';
+  return null;
+}
+
+var PAGES = [
+  { id: 'welcome' },
+  { id: 'role', part: 'A', qs: ['q1'] },
+  { id: 'about', part: 'A', qs: ['q2', 'q3'], when: isLearner },
+  { id: 'B', part: 'B', qs: ['q4', 'q5', 'q6', 'q7', 'q8'], when: isLearner,
+    de: 'Wie du lernst', en: 'How you study' },
+  { id: 'C', part: 'C', qs: ['q9', 'q10', 'q11'], when: isLearner,
+    de: 'Spiele und Geschichten', en: 'Games and stories' },
+  { id: 'D', part: 'D', qs: ['q12', 'q13', 'q14', 'q15', 'q16'], when: isLearner, image: true,
+    de: 'Das App-Konzept', en: 'The app concept' },
+  { id: 'E', part: 'E', when: function (a) { return isLearner(a) && !!blockE(a); },
+    qs: function (a) { return ({ ms: ['q17'], hs: ['q18', 'q19'], uni: ['q20', 'q21', 'q22'] })[blockE(a)] || []; },
+    sub: function (a) { return ({ ms: o('Mittelschule', 'Middle school'), hs: o('Höhere Schule (AHS / BHS)', 'Secondary school (AHS / BHS)'), uni: o('Universität / Fachhochschule', 'University') })[blockE(a)]; },
+    de: 'Zusatzfragen zu deiner Schule', en: 'Questions about your school' },
+  { id: 'F', part: 'F', qs: ['q23', 'q24', 'q25', 'q26', 'q27', 'q28', 'q29', 'q30'], when: isParent,
+    de: 'Für Eltern', en: 'For parents' },
+  { id: 'done' }
+];
+var PART_TITLES = { A: o('Über dich', 'About you') };
+
+/* ---------- Zustand ---------- */
+var STORE_KEY = 'studyterra-survey-v1';
+var state = { lang: 'de', page: 'welcome', a: {} };
+try { var saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (saved && saved.a) state = saved; } catch (e) {}
+if (state.page === 'done') state.page = 'welcome';
+function persist() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+var IN_APPS_SCRIPT = typeof google !== 'undefined' && google.script && google.script.run;
+
+function t(k) { return UI[state.lang][k]; }
+function L(obj) { return obj ? (obj[state.lang] || obj.de) : ''; }
+function qsOf(p) { return typeof p.qs === 'function' ? p.qs(state.a) : (p.qs || []); }
+function visiblePages() { return PAGES.filter(function (p) { return !p.when || p.when(state.a); }); }
+function pageById(id) { for (var i = 0; i < PAGES.length; i++) if (PAGES[i].id === id) return PAGES[i]; return PAGES[0]; }
+function el(tag, attrs, kids) {
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs) {
+    if (k === 'text') e.textContent = attrs[k];
+    else if (k === 'class') e.className = attrs[k];
+    else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] !== false && attrs[k] != null) e.setAttribute(k, attrs[k] === true ? '' : attrs[k]);
+  }
+  (kids || []).forEach(function (c) { if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+
+/* ---------- Fortschritt (der Spross wächst) ---------- */
+function updateProgress() {
+  var vis = visiblePages().filter(function (p) { return p.id !== 'welcome'; });
+  var idx = vis.findIndex(function (p) { return p.id === state.page; });
+  var frac = state.page === 'welcome' ? 0 : state.page === 'done' ? 1 : Math.max(0, idx) / (vis.length - 1);
+  document.getElementById('barFill').style.width = (frac * 100) + '%';
+  document.getElementById('stem').setAttribute('y2', String(34 - frac * 24));
+  [['leaf1', .15], ['leaf2', .45], ['leaf3', .7], ['bloom', .99]].forEach(function (x) {
+    document.getElementById(x[0]).setAttribute('opacity', frac >= x[1] ? '1' : '0');
+  });
+  var p = pageById(state.page);
+  var parts = vis.map(function (v) { return v.part; }).filter(function (v, i, arr) { return v && arr.indexOf(v) === i; });
+  var label = p.part ? t('part') + ' ' + p.part : '';
+  if (p.part && state.a.q1) label += ' · ' + (parts.indexOf(p.part) + 1) + ' ' + t('of') + ' ' + parts.length;
+  document.getElementById('partLabel').textContent = label;
+}
+
+/* ---------- Fragen rendern ---------- */
+function renderQuestion(id) {
+  var q = Q[id], a = state.a, isScale = q.type === 'scale', isText = q.type === 'text';
+  var box = el(isText ? 'div' : 'fieldset', { class: 'q', id: 'box-' + id });
+  var labelKids = [el('span', { class: 'num', text: q.n + '.' }), L(q)];
+  if (isText) box.appendChild(el('label', { class: 'qlabel', for: 'in-' + id }, labelKids));
+  else box.appendChild(el('legend', null, labelKids));
+  if (q.type === 'check') box.appendChild(el('div', { class: 'hint', text: t('multi') }));
+  if (isText) box.appendChild(el('div', { class: 'hint', text: t('optional') }));
+
+  if (q.type === 'radio' || q.type === 'check') {
+    var r = role(a);
+    var opts = q.options.filter(function (op) { return !op.roles || op.roles.indexOf(r) !== -1; });
+    var wrap = el('div', { class: 'opts' });
+    opts.forEach(function (op, i) {
+      var checked = q.type === 'radio' ? a[id] === op.v : (a[id] || []).indexOf(op.v) !== -1;
+      var input = el('input', { type: q.type === 'radio' ? 'radio' : 'checkbox', name: id, id: id + '-' + i, value: op.v, checked: checked });
+      input.addEventListener('change', function () { onChoice(id, op, input.checked); });
+      wrap.appendChild(el('label', { class: 'opt ' + q.type, for: id + '-' + i }, [input, el('span', { class: 'mark' }), el('span', { class: 'txt', text: L(op) })]));
+      if (op.other) {
+        var other = el('input', { type: 'text', class: 'other-input', id: id + '-other', maxlength: '300', placeholder: t('otherPh'), value: a[id + '_other'] || '' });
+        other.hidden = !checked;
+        other.addEventListener('input', function () { a[id + '_other'] = other.value; persist(); });
+        wrap.appendChild(other);
+      }
+    });
+    box.appendChild(wrap);
+  } else if (isScale) {
+    var sc = el('div', { class: 'scale' });
+    for (var v = 1; v <= 5; v++) (function (v) {
+      var input = el('input', { type: 'radio', name: id, id: id + '-' + v, value: String(v), checked: a[id] === v, 'aria-label': String(v) });
+      input.addEventListener('change', function () { a[id] = v; clearError(id); persist(); });
+      sc.appendChild(el('label', { for: id + '-' + v }, [input, el('span', { text: String(v) })]));
+    })(v);
+    box.appendChild(sc);
+    box.appendChild(el('div', { class: 'scale-ends' }, [el('span', { text: '1 = ' + L(q.min) }), el('span', { text: '5 = ' + L(q.max) })]));
+  } else if (isText) {
+    var ta = el('textarea', { id: 'in-' + id, maxlength: '2000', placeholder: t('textPh') });
+    ta.value = a[id] || '';
+    ta.addEventListener('input', function () { a[id] = ta.value; persist(); });
+    box.appendChild(ta);
+  }
+  return box;
+}
+
+function onChoice(id, op, checked) {
+  var q = Q[id], a = state.a;
+  if (q.type === 'radio') {
+    a[id] = op.v;
+  } else {
+    var list = (a[id] || []).filter(function (v) { return v !== op.v; });
+    if (checked) {
+      if (op.exclusive) list = [];
+      else list = list.filter(function (v) { return !q.options.some(function (x) { return x.exclusive && x.v === v; }); });
+      list.push(op.v);
+    }
+    a[id] = list;
+    // Häkchen anderer Optionen synchron halten (z. B. „Keine“)
+    document.querySelectorAll('input[name="' + id + '"]').forEach(function (inp) { inp.checked = list.indexOf(inp.value) !== -1; });
+  }
+  var other = document.getElementById(id + '-other');
+  if (other) {
+    var on = q.type === 'radio' ? a[id] === 'Anderes' : (a[id] || []).indexOf('Anderes') !== -1;
+    other.hidden = !on;
+    if (on && op.other && checked) other.focus();
+  }
+  clearError(id);
+  persist();
+}
+
+function isAnswered(id) {
+  var q = Q[id], v = state.a[id];
+  if (q.optional) return true;
+  if (q.type === 'check') return Array.isArray(v) && v.length > 0;
+  return v !== undefined && v !== null && v !== '';
+}
+function clearError(id) {
+  var box = document.getElementById('box-' + id);
+  if (!box) return;
+  box.classList.remove('invalid');
+  var err = box.querySelector('.err'); if (err) err.remove();
+}
+
+/* ---------- Seiten ---------- */
+function render() {
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  document.documentElement.lang = state.lang;
+  document.getElementById('langDe').setAttribute('aria-pressed', String(state.lang === 'de'));
+  document.getElementById('langEn').setAttribute('aria-pressed', String(state.lang === 'en'));
+  var note = document.getElementById('previewNote');
+  note.hidden = !!IN_APPS_SCRIPT; note.textContent = t('preview');
+  updateProgress();
+
+  var p = pageById(state.page);
+  var view = el('div', { class: 'anim-in', style: 'display:flex;flex-direction:column;gap:16px' });
+
+  if (p.id === 'welcome') {
+    view.appendChild(el('section', { class: 'intro' }, [
+      el('h1', { text: t('title') }),
+      el('div', { class: 'meta' }, [el('span', { class: 'chip', text: t('chipAnon') }), el('span', { class: 'chip', text: t('chipTime') })]),
+      el('p', { text: t('intro1') }),
+      el('p', { text: t('intro2') })
+    ]));
+    if (state.a.q1) {
+      view.appendChild(el('nav', { class: 'steps' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: t('startOver'), onclick: restart }),
+        el('button', { class: 'btn primary', type: 'button', text: t('resume'), onclick: function () { go(isParent(state.a) ? 'F' : 'about'); } })
+      ]));
+    } else {
+      view.appendChild(el('nav', { class: 'steps' }, [el('button', { class: 'btn primary', type: 'button', text: t('start'), onclick: function () { go('role'); } })]));
+    }
+  } else if (p.id === 'role') {
+    view.appendChild(sectionHead('A', L(PART_TITLES.A)));
+    var icons = {
+      pupil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2"/><path d="M8 8h6"/></svg>',
+      student: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></svg>',
+      parent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3 21v-3a6 6 0 0 1 12 0v3"/><path d="M14 21v-2a3 3 0 0 1 6 0v2"/></svg>'
+    };
+    var subs = { pupil: t('pupilSub'), student: t('studentSub'), parent: t('parentSub') };
+    var box = el('fieldset', { class: 'q', id: 'box-q1' }, [
+      el('legend', null, [el('span', { class: 'num', text: '1.' }), L(Q.q1)]),
+      el('div', { class: 'hint', text: t('roleHint') })
+    ]);
+    var roles = el('div', { class: 'roles' });
+    Q.q1.options.forEach(function (op) {
+      var key = role({ q1: op.v });
+      var b = el('button', { type: 'button', class: 'role', 'aria-pressed': String(state.a.q1 === op.v), onclick: function () { chooseRole(op.v); } });
+      b.innerHTML = icons[key];
+      b.appendChild(el('span', null, [el('b', { text: L(op) }), el('small', { text: subs[key] })]));
+      roles.appendChild(b);
+    });
+    box.appendChild(roles);
+    view.appendChild(box);
+    view.appendChild(navButtons(p));
+  } else if (p.id === 'done') {
+    var done = el('section', { class: 'done' });
+    done.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="104" rx="40" ry="8" fill="var(--soil)" opacity=".8"/><path d="M60 102V40" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/><path d="M60 84c-18 0-26-12-26-22 12 0 26 8 26 22z" fill="var(--accent)"/><path d="M60 66c18 0 26-12 26-22-12 0-26 8-26 22z" fill="var(--accent)"/><circle cx="60" cy="30" r="12" fill="var(--sun)"/></svg>';
+    done.appendChild(el('h1', { text: t('thanks') }));
+    done.appendChild(el('p', { text: t('thanksSub') }));
+    done.appendChild(el('button', { class: 'btn ghost', type: 'button', text: t('restart'), onclick: restart }));
+    view.appendChild(done);
+  } else {
+    var title = p.part === 'A' ? L(PART_TITLES.A) : L(p);
+    view.appendChild(sectionHead(p.part, title, p.sub ? L(p.sub(state.a)) : ''));
+    if (p.image) view.appendChild(appImage());
+    qsOf(p).forEach(function (id) { view.appendChild(renderQuestion(id)); });
+    view.appendChild(navButtons(p));
+  }
+  app.appendChild(view);
+}
+
+function sectionHead(part, title, sub) {
+  return el('div', { class: 'section-head' }, [
+    el('span', { class: 'eyebrow', text: t('part') + ' ' + part }),
+    el('h2', { text: title }),
+    sub ? el('p', { text: sub }) : null
+  ]);
+}
+
+function appImage() {
+  var fig = el('figure', { class: 'app-image', style: 'margin:0' });
+  if (APP_IMAGE_URL) {
+    fig.appendChild(el('img', { src: APP_IMAGE_URL, alt: t('imgCap') }));
+    fig.appendChild(el('figcaption', { text: t('imgCap') }));
+  } else {
+    fig.appendChild(el('div', { class: 'ph', text: t('imgPh') }));
+  }
+  return fig;
+}
+
+function isLastPage(p) {
+  var vis = visiblePages();
+  return vis[vis.length - 2] && vis[vis.length - 2].id === p.id; // vorletzte = letzte Fragen-Seite (danach „done“)
+}
+
+function navButtons(p) {
+  var nav = el('nav', { class: 'steps' });
+  nav.appendChild(el('button', { class: 'btn ghost', type: 'button', text: t('back'), onclick: back }));
+  if (p.id !== 'role' || state.a.q1) {
+    var last = isLastPage(p);
+    var btn = el('button', { class: 'btn primary', type: 'button', id: 'nextBtn', text: last ? t('submit') : t('next'), onclick: function () { next(btn); } });
+    nav.appendChild(btn);
+  }
+  return nav;
+}
+
+function chooseRole(v) {
+  var prev = state.a.q1;
+  state.a.q1 = v;
+  // Schulform passt evtl. nicht mehr zur neuen Rolle
+  if (prev && prev !== v) { delete state.a.q3; delete state.a.q3_other; }
+  persist();
+  go(isParent(state.a) ? 'F' : 'about'); // Eltern springen direkt zu Teil F
+}
+
+function go(id) { state.page = id; persist(); render(); window.scrollTo(0, 0); }
+
+function back() {
+  var vis = visiblePages();
+  var i = vis.findIndex(function (p) { return p.id === state.page; });
+  go(i > 0 ? vis[i - 1].id : 'welcome');
+}
+
+function next(btn) {
+  var p = pageById(state.page);
+  var missing = qsOf(p).filter(function (id) { return !isAnswered(id); });
+  if (missing.length) {
+    missing.forEach(function (id) {
+      var box = document.getElementById('box-' + id);
+      if (box && !box.classList.contains('invalid')) { box.classList.add('invalid'); box.appendChild(el('div', { class: 'err', text: t('required') })); }
+    });
+    var first = document.getElementById('box-' + missing[0]);
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  var vis = visiblePages();
+  var i = vis.findIndex(function (x) { return x.id === p.id; });
+  var nxt = vis[i + 1];
+  if (nxt && nxt.id === 'done') submit(btn);
+  else if (nxt) go(nxt.id);
+}
+
+/* ---------- Absenden ---------- */
+function headerFor(id) { return 'Q' + Q[id].n + ' ' + Q[id].de; }
+function restart() {
+  state = { lang: state.lang, page: 'welcome', a: {} };
+  try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+  go('welcome');
+}
+function withAnswers(a, fn) { var keep = state.a; state.a = a; try { return fn(); } finally { state.a = keep; } }
+function buildPayload() {
+  var headers = [], answers = {};
+  var shown = {};
+  visiblePages().forEach(function (p) { qsOf(p).forEach(function (id) { shown[id] = true; }); });
+  Q_ORDER.forEach(function (id) {
+    var q = Q[id], h = headerFor(id) + (q.type === 'text' ? ' [Text]' : '');
+    headers.push(h);
+    var hasOther = (q.options || []).some(function (x) { return x.other; });
+    var ho = 'Q' + q.n + ' Anderes (Text) [Text]';
+    if (hasOther) headers.push(ho);
+    if (!shown[id]) return; // nicht relevante Fragen bleiben leer
+    var v = state.a[id];
+    if (q.type === 'check') v = (v || []).join(' | ');
+    if (v !== undefined && v !== null && v !== '') answers[h] = v;
+    if (hasOther) {
+      var picked = q.type === 'check' ? (state.a[id] || []).indexOf('Anderes') !== -1 : state.a[id] === 'Anderes';
+      if (picked && state.a[id + '_other']) answers[ho] = state.a[id + '_other'];
+    }
+  });
+  return { lang: state.lang, headers: headers, answers: answers };
+}
+
+function submit(btn) {
+  var payload = buildPayload();
+  btn.disabled = true; btn.textContent = t('sending');
+  var oldErr = document.querySelector('.send-error'); if (oldErr) oldErr.remove();
+  var send = IN_APPS_SCRIPT
+    ? new Promise(function (res, rej) { google.script.run.withSuccessHandler(res).withFailureHandler(rej).submitResponse(payload); })
+    : new Promise(function (res) { console.log('Vorschau – Antwort:', payload); setTimeout(res, 500); });
+  send.then(function () {
+    state = { lang: state.lang, page: 'done', a: {} };
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    render(); window.scrollTo(0, 0);
+  }, function () {
+    btn.disabled = false; btn.textContent = t('submit');
+    btn.closest('nav').insertAdjacentElement('afterend', el('p', { class: 'send-error', role: 'alert', text: t('sendErr') }));
+  });
+}
+
+/* ---------- Sprache ---------- */
+document.getElementById('langDe').addEventListener('click', function () { state.lang = 'de'; persist(); render(); });
+document.getElementById('langEn').addEventListener('click', function () { state.lang = 'en'; persist(); render(); });
+
+/* ============================================================
+   AUSWERTUNG (nur für das Team)
+   Aufruf: Web-App-Link + ?auswertung   (z. B. …/exec?auswertung)
+   Passwort steht in Code.gs (ADMIN_PASSWORD).
+   ============================================================ */
+var admin = { rows: [], filter: 'all', demo: false, sheetUrl: '', pw: '' };
+var ROLE_FILTERS = [
+  { k: 'all', label: 'Alle' },
+  { k: 'Schüler/in', label: 'Schüler/innen' },
+  { k: 'Student/in', label: 'Studierende' },
+  { k: 'Elternteil', label: 'Eltern' }
+];
+function textHeader(id) { return headerFor(id) + (Q[id].type === 'text' ? ' [Text]' : ''); }
+function otherHeader(id) { return 'Q' + Q[id].n + ' Anderes (Text) [Text]'; }
+
+function startAdmin() {
+  document.title = 'Auswertung Study Terra';
+  document.querySelector('.lang').hidden = true;
+  document.querySelector('.bar').hidden = true;
+  document.getElementById('previewNote').hidden = true;
+  document.getElementById('partLabel').textContent = 'Auswertung';
+  ['leaf1', 'leaf2', 'leaf3', 'bloom'].forEach(function (id) { document.getElementById(id).setAttribute('opacity', '1'); });
+  document.getElementById('stem').setAttribute('y2', '10');
+  if (!IN_APPS_SCRIPT) { admin.demo = true; admin.rows = demoRows(60); renderDash(); return; }
+  renderLogin('');
+}
+
+function renderLogin(msg) {
+  var app = document.getElementById('app'); app.innerHTML = '';
+  var input = el('input', { type: 'password', id: 'adminPw', autocomplete: 'current-password', placeholder: 'Passwort' });
+  var btn = el('button', { class: 'btn primary small', type: 'submit', text: 'Ergebnisse anzeigen' });
+  var form = el('form', { class: 'login' }, [
+    el('div', { class: 'section-head' }, [el('span', { class: 'eyebrow', text: 'Nur für das Team' }), el('h2', { text: 'Auswertung' }),
+      el('p', { text: 'Gib das Passwort ein, das in Code.gs bei ADMIN_PASSWORD steht.' })]),
+    el('label', { for: 'adminPw', class: 'qlabel', text: 'Passwort' }),
+    el('div', { class: 'row' }, [input, btn]),
+    msg ? el('p', { class: 'msg', role: 'alert', text: msg }) : null
+  ]);
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    btn.disabled = true; btn.textContent = 'Wird geladen …';
+    loadResults(input.value, function (err) { renderLogin(err); });
+  });
+  app.appendChild(form);
+  input.focus();
+}
+
+function loadResults(pw, onError) {
+  google.script.run
+    .withSuccessHandler(function (res) { admin.pw = pw; admin.rows = res.rows || []; admin.sheetUrl = res.sheetUrl || ''; renderDash(); })
+    .withFailureHandler(function (err) {
+      var m = String(err && err.message || err);
+      onError(m.indexOf('wrong_password') !== -1 ? 'Das Passwort stimmt nicht.'
+        : m.indexOf('not_configured') !== -1 ? 'In Code.gs ist noch kein Passwort gesetzt (ADMIN_PASSWORD).'
+        : 'Die Ergebnisse konnten nicht geladen werden: ' + m);
+    })
+    .getResults(pw);
+}
+
+function filteredRows() {
+  return admin.filter === 'all' ? admin.rows : admin.rows.filter(function (r) { return r[textHeader('q1')] === admin.filter; });
+}
+
+function renderDash() {
+  var app = document.getElementById('app'); app.innerHTML = '';
+  var dash = el('div', { class: 'dash' });
+  dash.appendChild(el('div', { class: 'section-head' }, [
+    el('span', { class: 'eyebrow', text: admin.demo ? 'Vorschau mit Beispieldaten' : 'Nur für das Team' }),
+    el('h2', { text: 'Auswertung' }),
+    admin.demo ? el('p', { text: 'Das sind erfundene Beispieldaten, damit ihr seht, wie die Auswertung aussieht. In der echten Web-App stehen hier eure Antworten.' }) : null
+  ]));
+
+  var all = admin.rows, count = function (v) { return all.filter(function (r) { return r[textHeader('q1')] === v; }).length; };
+  dash.appendChild(el('div', { class: 'tiles' }, [
+    tile(all.length, 'Antworten gesamt'), tile(count('Schüler/in'), 'Schüler/innen'),
+    tile(count('Student/in'), 'Studierende'), tile(count('Elternteil'), 'Eltern')
+  ]));
+
+  var filters = el('div', { class: 'filters', role: 'group', 'aria-label': 'Nach Gruppe filtern' });
+  ROLE_FILTERS.forEach(function (f) {
+    filters.appendChild(el('button', { type: 'button', 'aria-pressed': String(admin.filter === f.k), text: f.label,
+      onclick: function () { admin.filter = f.k; renderDash(); } }));
+  });
+  dash.appendChild(filters);
+
+  var actions = el('div', { class: 'dash-actions' });
+  if (!admin.demo) {
+    var refresh = el('button', { class: 'btn ghost small', type: 'button', text: 'Aktualisieren', onclick: function () {
+      refresh.disabled = true; refresh.textContent = 'Wird geladen …';
+      loadResults(admin.pw, function (err) { refresh.disabled = false; refresh.textContent = 'Aktualisieren'; alertMsg(err); });
+    } });
+    actions.appendChild(refresh);
+    if (admin.sheetUrl) actions.appendChild(el('a', { class: 'btn ghost small', href: admin.sheetUrl, target: '_blank', rel: 'noopener', text: 'Google-Tabelle öffnen' }));
+  }
+  if (actions.childNodes.length) dash.appendChild(actions);
+
+  var rows = filteredRows();
+  if (!rows.length) {
+    dash.appendChild(el('p', { class: 'subtle', text: all.length ? 'In dieser Gruppe gibt es noch keine Antworten.' : 'Noch keine Antworten. Sobald jemand die Umfrage abschickt, erscheint sie hier.' }));
+  }
+  Q_ORDER.forEach(function (id) {
+    if (id === 'q1' && admin.filter !== 'all') return;
+    var card = resultCard(id, rows);
+    if (card) dash.appendChild(card);
+  });
+  app.appendChild(dash);
+}
+
+function alertMsg(m) { var d = document.querySelector('.dash'); if (d) d.insertBefore(el('p', { class: 'send-error', role: 'alert', text: m }), d.children[2]); }
+function tile(n, label) { return el('div', { class: 'tile' }, [el('b', { text: String(n) }), el('span', { text: label })]); }
+
+function resultCard(id, rows) {
+  var q = Q[id], h = textHeader(id);
+  var vals = rows.map(function (r) { return r[h]; }).filter(function (v) { return v !== undefined && v !== null && String(v) !== ''; });
+  var others = rows.map(function (r) { return r[otherHeader(id)]; }).filter(function (v) { return v; });
+  if (!vals.length) return null;
+  var box = el('section', { class: 'q' });
+  box.appendChild(el('div', { class: 'qlabel' }, [el('span', { class: 'num', text: q.n + '.' }), q.de]));
+  var nLabel = vals.length + (vals.length === 1 ? ' Antwort' : ' Antworten') + (q.type === 'check' ? ' · Mehrfachauswahl, Prozent je Person' : '');
+  box.appendChild(el('div', { class: 'res-n', text: nLabel }));
+
+  if (q.type === 'text') {
+    box.appendChild(textList(vals.slice().reverse()));
+    return box;
+  }
+  var counts = {};
+  vals.forEach(function (v) { String(v).split(' | ').forEach(function (p) { p = p.trim(); if (p) counts[p] = (counts[p] || 0) + 1; }); });
+  var keys = q.type === 'scale' ? ['1', '2', '3', '4', '5'] : q.options.map(function (op) { return op.v; });
+  Object.keys(counts).forEach(function (k) { if (keys.indexOf(k) === -1) keys.push(k); });
+  var max = Math.max.apply(null, keys.map(function (k) { return counts[k] || 0; }).concat([1]));
+  var bars = el('div', { class: 'bars' });
+  keys.forEach(function (k) {
+    var c = counts[k] || 0, pct = Math.round(c / vals.length * 100);
+    var label = q.type === 'scale' ? k + (k === '1' ? ' = ' + q.min.de : k === '5' ? ' = ' + q.max.de : '') : k;
+    var row = el('div', { class: 'bar-row' + (c ? '' : ' zero'), title: label + ': ' + c + ' (' + pct + ' %)' }, [
+      el('div', { class: 'lbl' }, [el('span', { text: label }), el('span', { text: c + ' · ' + pct + ' %' })]),
+      el('div', { class: 'track' }, [el('i', { style: 'width:' + (c / max * 100) + '%' })])
+    ]);
+    bars.appendChild(row);
+  });
+  box.appendChild(bars);
+  if (q.type === 'scale') {
+    var sum = vals.reduce(function (s, v) { return s + Number(v); }, 0);
+    box.appendChild(el('div', { class: 'avg' }, ['Durchschnitt: ', el('b', { text: (sum / vals.length).toFixed(1).replace('.', ',') }), ' von 5']));
+  }
+  if (others.length) {
+    box.appendChild(el('div', { class: 'res-n', text: 'Angaben bei „Anderes“:' }));
+    box.appendChild(textList(others.slice().reverse()));
+  }
+  return box;
+}
+
+function textList(items) {
+  var LIMIT = 5, ul = el('ul', { class: 'texts' });
+  items.forEach(function (v, i) { var li = el('li', { text: String(v) }); li.hidden = i >= LIMIT; ul.appendChild(li); });
+  if (items.length <= LIMIT) return ul;
+  var wrap = el('div', { style: 'display:flex;flex-direction:column;gap:8px' }, [ul]);
+  var more = el('button', { class: 'linkish', type: 'button', text: 'Alle ' + items.length + ' anzeigen', onclick: function () {
+    ul.querySelectorAll('li').forEach(function (li) { li.hidden = false; }); more.remove();
+  } });
+  wrap.appendChild(more);
+  return wrap;
+}
+
+/* Beispieldaten nur für die Vorschau außerhalb von Google */
+function demoRows(n) {
+  var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  function pick(arr) { return arr[Math.floor(rnd() * arr.length)]; }
+  var texts = ['Beispielantwort: zu viele Mitteilungen', 'Beispielantwort: wenn es Geld kostet', 'Beispielantwort: Quizlet', 'Beispielantwort: mehr Tiere in der Welt', 'Beispielantwort: Datenschutz'];
+  var out = [];
+  for (var i = 0; i < n; i++) {
+    var a = { q1: pick(['Schüler/in', 'Schüler/in', 'Student/in', 'Elternteil']) };
+    withAnswers(a, function () {
+      visiblePages().forEach(function (p) {
+        qsOf(p).forEach(function (id) {
+          var q = Q[id];
+          if (id === 'q1') return;
+          if (q.type === 'scale') a[id] = 1 + Math.floor(rnd() * 5);
+          else if (q.type === 'text') { if (rnd() < 0.4) a[id] = pick(texts); }
+          else {
+            var opts = q.options.filter(function (op) { return !op.roles || op.roles.indexOf(role(a)) !== -1; });
+            if (q.type === 'radio') a[id] = pick(opts).v;
+            else a[id] = opts.filter(function () { return rnd() < 0.35; }).map(function (op) { return op.v; }).slice(0, 3);
+            if (q.type === 'check' && !a[id].length) a[id] = [opts[0].v];
+          }
+        });
+      });
+      out.push(buildPayload().answers);
+    });
+  }
+  return out;
+}
+
+/* ---------- Start ---------- */
+if (IN_APPS_SCRIPT && google.script.url) {
+  google.script.url.getLocation(function (loc) {
+    if (loc && loc.parameter && 'auswertung' in loc.parameter) startAdmin(); else render();
+  });
+} else if (location.hash === '#auswertung') {
+  startAdmin();
+} else {
+  render();
+}
+window.addEventListener('hashchange', function () { if (!IN_APPS_SCRIPT) { if (location.hash === '#auswertung') startAdmin(); else location.reload(); } });
+</script>
