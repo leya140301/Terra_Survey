@@ -51,7 +51,12 @@ body {
 }
 header.top { display: flex; align-items: center; gap: 14px; }
 .brand { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.brand .name { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
+.brand .name {
+  appearance: none; background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; align-self: flex-start;
+}
+.brand .name:hover { color: var(--accent); }
+.brand .name:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .brand .part { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .lang { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
 .lang button {
@@ -241,7 +246,7 @@ nav.steps { display: flex; gap: 10px; justify-content: space-between; align-item
       <circle class="bloom" id="bloom" cx="22" cy="9" r="4.5" opacity="0"></circle>
     </svg>
     <div class="brand">
-      <span class="name">Study Terra</span>
+      <button type="button" class="name" id="homeBtn">Study Terra</button>
       <span class="part" id="partLabel"></span>
     </div>
     <div class="lang" role="group" aria-label="Sprache / Language">
@@ -612,7 +617,6 @@ function render() {
     done.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="104" rx="40" ry="8" fill="var(--soil)" opacity=".8"/><path d="M60 102V40" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/><path d="M60 84c-18 0-26-12-26-22 12 0 26 8 26 22z" fill="var(--accent)"/><path d="M60 66c18 0 26-12 26-22-12 0-26 8-26 22z" fill="var(--accent)"/><circle cx="60" cy="30" r="12" fill="var(--sun)"/></svg>';
     done.appendChild(el('h1', { text: t('thanks') }));
     done.appendChild(el('p', { text: t('thanksSub') }));
-    done.appendChild(el('button', { class: 'btn ghost', type: 'button', text: t('restart'), onclick: restart }));
     view.appendChild(done);
   } else {
     var title = p.part === 'A' ? L(PART_TITLES.A) : L(p);
@@ -752,6 +756,14 @@ function submit(btn) {
   });
 }
 
+/* ---------- „Study Terra“ oben: zurück zum Anfang ---------- */
+var IS_ADMIN = false;
+document.getElementById('homeBtn').addEventListener('click', function () {
+  if (IS_ADMIN) return;
+  if (state.page === 'done') state.a = {};
+  go('welcome');
+});
+
 /* ---------- Sprache ---------- */
 document.getElementById('langDe').addEventListener('click', function () { state.lang = 'de'; persist(); render(); });
 document.getElementById('langEn').addEventListener('click', function () { state.lang = 'en'; persist(); render(); });
@@ -772,6 +784,7 @@ function textHeader(id) { return headerFor(id) + (Q[id].type === 'text' ? ' [Tex
 function otherHeader(id) { return 'Q' + Q[id].n + ' Anderes (Text) [Text]'; }
 
 function startAdmin() {
+  IS_ADMIN = true;
   document.title = 'Auswertung Study Terra';
   document.querySelector('.lang').hidden = true;
   document.querySelector('.bar').hidden = true;
