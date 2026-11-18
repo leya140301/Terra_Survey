@@ -79,11 +79,11 @@ Tipps:
 ## So funktioniert die Verzweigung
 | Antwort bei Frage 1 | Danach |
 |---|---|
-| **Elternteil** | sofort Teil F (Fragen 23–30), dann Ende |
+| **Elternteil** | sofort Teil F (Fragen 22–29), dann Ende |
 | **Schüler/in** | Fragen 2–3 (nur Schulformen, keine Hochschulen), Teile B–D, dann Teil E passend zur Schule |
-| **Student/in** | Fragen 2–3 (nur Uni/FH), Teile B–D, dann Teil E für Uni/FH (Fragen 20–22) |
+| **Student/in** | Fragen 2–3 (nur Uni/FH), Teile B–D, dann Teil E für Uni/FH (Fragen 19–21) |
 
-Teil E: Mittelschule → Frage 17 · AHS/BHS → Fragen 18–19 · Uni/FH → Fragen 20–22 · „Anderes“ → Block für Schüler/innen bzw. Studierende je nach Rolle.
+Teil E: Mittelschule → Frage 16 · AHS/BHS → Fragen 17–18 · Uni/FH → Fragen 19–21 · „Anderes“ → Block für Schüler/innen bzw. Studierende je nach Rolle.
 
 Die Umfrage gibt es auf Deutsch und Englisch (Umschalter oben rechts). In der Tabelle stehen die Antworten immer auf Deutsch, damit die Auswertung einheitlich bleibt. Die Spalte „Sprache“ zeigt, in welcher Sprache ausgefüllt wurde.
 Die Umfrage ist anonym: Es werden keine Namen, E-Mail-Adressen oder IP-Adressen gespeichert. Ein angefangener Fragebogen bleibt im Browser der Person erhalten, falls sie die Seite versehentlich schließt.
