@@ -364,7 +364,11 @@ var Q = {
   q18: { n: 18, type: 'check', de: 'Wofür würdest du die App am meisten brauchen?', en: 'What would you need the app for most?',
         options: [o('Schularbeiten / Tests', 'Exams / tests'), o('Matura / Reifeprüfung', 'Final exams (Matura)'), o('Vokabeln', 'Vocabulary'), o('Hausübungen', 'Homework'), OTHER()] },
   q19: { n: 19, type: 'radio', de: 'Würdest du für so eine App bezahlen? Wenn ja, wie viel pro Monat?', en: 'Would you pay for an app like this? If so, how much per month?', options: PAY },
-  q20: { n: 20, type: 'text', optional: true, de: 'Wie bereitest du dich meistens auf Prüfungen vor?', en: 'How do you usually prepare for exams?' },
+  q20: { n: 20, type: 'check', de: 'Wie bereitest du dich meistens auf Prüfungen vor?', en: 'How do you usually prepare for exams?',
+        options: [o('Skripten / Folien durcharbeiten', 'Working through lecture notes / slides'), o('Zusammenfassungen schreiben', 'Writing summaries'),
+                  o('Karteikarten (Papier oder App)', 'Flashcards (paper or app)'), o('Altfragen / Probeprüfungen', 'Past exams / practice exams'),
+                  o('Lerngruppe', 'Study group'), o('Videos / Online-Kurse', 'Videos / online courses'), o('KI-Tools (z. B. ChatGPT)', 'AI tools (e.g. ChatGPT)'),
+                  o('Sonstige', 'Other', { other: true })] },
   q21: { n: 21, type: 'scale', de: 'Wäre dir eine verspielte App mit Geschichte für das Studium zu kindisch?', en: 'Would a playful, story-based app feel too childish for university?',
         min: o('überhaupt nicht', 'not at all'), max: o('auf jeden Fall', 'definitely') },
   q22: { n: 22, type: 'radio', de: 'Würdest du für so eine App bezahlen? Wenn ja, wie viel pro Monat?', en: 'Would you pay for an app like this? If so, how much per month?', options: PAY },
@@ -511,6 +515,7 @@ function renderQuestion(id) {
   return box;
 }
 
+function otherValue(q) { var x = (q.options || []).filter(function (op) { return op.other; })[0]; return x ? x.v : null; }
 function onChoice(id, op, checked) {
   var q = Q[id], a = state.a;
   if (q.type === 'radio') {
@@ -528,7 +533,8 @@ function onChoice(id, op, checked) {
   }
   var other = document.getElementById(id + '-other');
   if (other) {
-    var on = q.type === 'radio' ? a[id] === 'Anderes' : (a[id] || []).indexOf('Anderes') !== -1;
+    var ov = otherValue(q);
+    var on = q.type === 'radio' ? a[id] === ov : (a[id] || []).indexOf(ov) !== -1;
     other.hidden = !on;
     if (on && op.other && checked) other.focus();
   }
@@ -721,7 +727,8 @@ function buildPayload() {
     if (q.type === 'check') v = (v || []).join(' | ');
     if (v !== undefined && v !== null && v !== '') answers[h] = v;
     if (hasOther) {
-      var picked = q.type === 'check' ? (state.a[id] || []).indexOf('Anderes') !== -1 : state.a[id] === 'Anderes';
+      var ov = otherValue(q);
+      var picked = q.type === 'check' ? (state.a[id] || []).indexOf(ov) !== -1 : state.a[id] === ov;
       if (picked && state.a[id + '_other']) answers[ho] = state.a[id + '_other'];
     }
   });
